@@ -1,0 +1,289 @@
+include tailsAnimations
+global bool superoption
+global u8 TPal
+global bool iczts
+function bool Standalone.onWriteToSpriteTable(s16 px, s16 py, u16 renderQueue)
+{
+  
+  	u8 atex
+  	u64 key
+  	u8 gameMode = global.game_mode & 0x7f
+	bool prioFlag = (objA0.sprite_attributes & sprite_attribute.PRIORITY) != 0
+
+	if (gameMode == 0x0c || gameMode == 0x08)
+	{
+			// Sonic on the snowboard in ICZ 1
+		if (isMainCharacter(CHARACTER_TAILS) && u8[0xffffE654] == 0 && (objA0.update_address == 0x03943a || objA0.update_address == 0x0394a0 || objA0.update_address == 0x0395fe))
+		{
+			key = stringformat("character_tails_snowboarding_0x%02x", objA0.animation.sprite)
+			if (!Renderer.hasCustomSprite(key))
+			{
+				key = Renderer.setupCustomCharacterSprite(0x345010, 0x347f8a, objA0.mapping_offset, objA0.animation.sprite, 0x00)
+			}
+			Renderer.drawCustomSprite(key, px, py, 0x60, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue)
+			return true
+		}
+		if (objA0.update_address == 0x05c74a)
+		{
+			u8 character = (objA0.update_address == 0x05c55c) ? CHARACTER_SONIC : (objA0.update_address == 0x05c74a) ? CHARACTER_TAILS : CHARACTER_KNUCKLES
+			atex = 0x40 + character * 0x20
+			if (global.characters == CHARS_TAILS_ALONE && gameMode == 0x14 && u8[0xffffE654] == 0)
+			{
+				key = stringformat("character_tails_continue_0x%02x",(character == CHARACTER_TAILS) ? objA0.animation.sprite : objA0.animation.frame)
+				if (Renderer.hasCustomSprite(key))
+				{
+					Renderer.drawCustomSprite(key, px, py, atex, prioFlag ? SPRITE_FLAG_PRIO : 0, renderQueue)
+					return true
+				}
+			}
+			if (gameMode == 0x14 && global.characters == CHARS_SONIC_AND_TAILS  || global.characters == CHARS_KNUCKLES_AND_TAILS && gameMode == 0x14 &&  u8[0xffffE654] == 0)
+			{
+				key = stringformat("s&t_continue_0x%02x",(character == CHARACTER_TAILS) ? objA0.animation.sprite-5 : objA0.animation.frame)
+				if (Renderer.hasCustomSprite(key))
+				{
+					Renderer.drawCustomSprite(key, px, py, atex, 0, renderQueue)
+					return true
+				}
+			}
+		}
+
+		if	((objA0.update_address == 0x05e18a) && (global.characters == CHARS_TAILS_ALONE)) 
+		{
+			key = stringformat ((outro.ending_type == 0) ? "supend_0x%02x" : "end_0x%02x", objA0.animation.sprite)
+
+			if(Renderer.hasCustomSprite(key))
+			{
+			Renderer.drawCustomSprite(key, px, py, 0x20, objA0.render_flags | (prioFlag ? SPRITE_FLAG_PRIO : 0), renderQueue)
+				return true
+			}
+		}
+	}
+  return base.Standalone.onWriteToSpriteTable(px, py, renderQueue)
+}
+function string getCharacterSpriteKey(u8 character, bool isSuperActive)
+{
+    if (u8[0xffffE654] == 0 && (global.game_mode  == 0x0c || global.game_mode  == 0x08) && isSuperActive && superoption) 
+    {
+        if (character == CHARACTER_TAILS)
+            return "character_stails"
+    }
+    return base.getCharacterSpriteKey(character, isSuperActive)
+}
+function string getCharacterPaletteKey(u8 character)
+{
+  	if (character == CHARACTER_TAILS && u8[0xffffE654] == 0)
+		return stringformat("character_palette_tails_0%d", TPal)
+  	return base.getCharacterPaletteKey(character)
+}
+function string getCharacterBonusTextIcon(u8 character)
+{
+	if (character == CHARACTER_TAILS && u8[0xffffE654] == 0)
+		return stringformat("hud_bonus_icon_0%d", TPal)
+	return base.getCharacterBonusTextIcon(character)
+}
+function string getCharacterContinueIcon(u8 character)
+{
+	if (character == CHARACTER_TAILS && u8[0xffffE654] == 0)
+		return stringformat("continue_icon_0%d", TPal)
+	return base.getCharacterContinueIcon(character)
+}
+function u64 Standalone.getModdedAnimationSpriteKey(u8 character, u16 animationSpriteEx)
+{
+	if (char.state == char.state.DROWNED && character == CHARACTER_TAILS && u8[0xffffE654] == 0 )
+		return "character_tails_0xdd"
+	return base.Standalone.getModdedAnimationSpriteKey(character, animationSpriteEx)
+}
+function u64 Monitor.getIconSpriteKey(u8 type)
+{
+	if (type == 0x01 && isMainCharacter(CHARACTER_TAILS) && u8[0xffffE654] == 0 && super.active.tails && superoption)
+	return "monitor_icon_super_tails"
+	return base.Monitor.getIconSpriteKey(type)
+}
+function string getCharacterLivesIcon(u8 character)
+{
+	if (character == CHARACTER_TAILS && u8[0xffffE654] == 0 && superoption)
+	{
+		if (super.active.tails)
+		{
+			return ((global.region_code & 0x80) ? "hud_lives_icon_supertails" : "hud_lives_icon_supermiles")
+		}
+		else
+		{
+			return ((global.region_code & 0x80) ? "hud_lives_icon_tails" : "hud_lives_icon_miles")
+		}
+	}
+	return base.getCharacterLivesIcon(character)
+}
+
+//# address-hook(0x05c2e0) end(0x05c4d4)
+function void fn05c2e0()
+{
+	if (CHARACTER_TAILS && u8[0xffffE654] == 0)
+	{
+	    base.fn05c2e0()
+		return
+	}
+	if (global.characters == CHARS_TAILS_ALONE)
+	{
+		u32[0xffffb000] = 0x05c718	// Sonic Alone in continue screen
+	}
+}
+//snow boarding tails
+//# address-hook(0x01be46) end(0x01bfae)
+function void SetupCharacterAtStartPosition()
+{
+    //only check for tails thanks
+    if (global.zone_act == 0x0500 && isMainCharacter(CHARACTER_TAILS) && u8[0xffffE654] == 0)
+    {
+	if (checkpoint.number != 0)
+	{
+		SetupCharacterAtLastCheckpoint()
+		D1.u16 = u16[0xffffb000 + 0x10]
+		D0.u16 = u16[0xffffb000 + 0x14]
+	}
+	else
+	{	
+			A1 = isMainCharacter(CHARACTER_KNUCKLES) ? 0x1e3cd8 : 0x1e3c18		// Get starting positions from respective tables
+			A1 += global.zone * 8 + global.act * 4
+			D1 = u16[A1]		// Get x-position
+			D0 = u16[A1+2]		// Get y-position
+			u16[0xffffb000 + 0x10] = D1.u16		// Set Player 1 x-position
+			u16[0xffffb000 + 0x14] = D0.u16		// Set Player 1 y-position
+			if (global.zone_act == 0x0500)
+			{	
+				// IceCap Act 1
+				if (CHARACTER_TAILS && u8[0xffffE654] != 0) || (!iczts)
+				{
+					u16[0xffffb000 + 0x10] = 0x3780
+					u16[0xffffb000 + 0x14] = 0x01e0
+					camera.position.x.u16 = 0x36f0
+					camera.position.y.u16 = 0x0200
+					move_area.left  = 0x35a0
+					move_area.left.target = 0x35a0
+					move_area.left.player2 = 0x35a0
+					level.vertical_wrap = 0x0200
+					move_area.top.target = 0x0200
+					level.vertical_wrap.player2 = 0x0200
+					camera.position.x.u16.player2 = 0x36f0
+					camera.position.y.u16.player2 = 0x0200
+					return
+				}
+				else if (isMainCharacter(CHARACTER_TAILS) && u8[0xffffE654] == 0)
+				{
+					//sonics icz starting position here
+					u16[0xffffb000 + 0x10] = 0x0009
+					u16[0xffffb000 + 0x14] = 0x00f0
+				}
+			}
+			
+		}
+		D1.s16 = max(D1.s16 - getScreenWidth() / 2, 0)
+		if (competition_mode.active == 0)
+		{
+		#if STANDALONE
+			// Avoid exact tile edges
+			//  -> This was particularly added in to avoid glitches in first pixel row after exiting first Giant Ring in AIZ 2
+			//     (There's probably a better solution, that generally solves this type of glitches when going left in AIZ 2)
+			if ((D1.u16 & 0x0f) == 0)
+				++D1.u16
+		#endif
+			D1.u16 = min(D1.u16, move_area.right)
+		}
+
+		camera.position.x.u16 = D1.u16
+		camera.position.x.u16.player2 = D1.u16
+
+		D0.s16 = clamp(D0.s16 - 96, 0, s16(move_area.bottom.current))
+		camera.position.y.u16 = D0.u16
+		camera.position.y.u16.player2 = D0.u16
+	}
+	else
+	{
+	base.SetupCharacterAtStartPosition()
+	return
+	}
+}
+//# address-hook(0x0067ee) end(0x0069b6)
+function void fn0067ee()
+{
+     if (!isMainCharacter(CHARACTER_TAILS) && u8[0xffffE654] == 0)
+    {
+        base.fn0067ee()
+        return
+    }
+	u32[0xffffb094] = 0x006c2c
+	InitializeGameCharacters()
+	RestoreShield()
+	if (checkpoint.number != 0 || global.stage_type != 0)
+		return
+
+	A1 = 0xffffb000
+	A2 = 0xffffb04a
+
+	if (global.zone_act == 0x0500)
+	{
+		//u32[0xffffb172] = 0x0396e4
+		if ((iczts && isMainCharacter(CHARACTER_TAILS) && u8[0xffffE654] == 0) || (isMainCharacter(CHARACTER_SONIC) && u8[0xffffE654] != 0))
+		{
+			u32[0xffffb172] = 0x0396e4
+			
+		}
+		// other chars skip snowboarding
+		else if (u8[0xffffE654] != 0 && isMainCharacter(CHARACTER_TAILS)) || (!iczts)
+        {
+            u32[0xffffb172] = 0x039b66
+
+        }
+    }
+    else 
+    {
+        base.fn0067ee()
+    }
+}
+
+//# address-hook(0x0160d2)
+function void TailsTails.Update()
+{
+	// Update various properties from Tails main object
+	A1 = 0xffff0000 + u16[A0 + 0x30]
+	if (global.zone_act == 0x0500)
+	{
+		//objA1.state = char.state.DISAPPEARED
+		
+	}
+	base.TailsTails.Update()
+}
+//# address-hook(0x03943a) end(0x039470)
+function void fn03943a()
+{
+    if (isMainCharacter(CHARACTER_TAILS) && u8[0xffffE654] == 0 && iczts)
+	{
+		// This state is only used before touching the ground with the snowboard for the first time
+		A1 = 0xffffb000
+		objA1.state = char.state.RUNNING
+	}
+	Object.animationUpdate(0x039476)
+	fn03968e()
+	base.fn03943a()
+}
+
+
+//# address-hook(0x0394a0) end(0x0394f0)
+function void fn0394a0()
+{
+	// Main state while snowboarding (except for curves)
+
+    if (isMainCharacter(CHARACTER_TAILS) && u8[0xffffE654] == 0 && iczts)
+    {
+		A1 = 0xffffb000
+		objA1.state = char.state.RUNNING
+	}
+#if STANDALONE
+	// Update achievement
+	if (ring_counter >= 50)
+	{
+		Game.setAchievementComplete(ACHIEVEMENT_ICZ_SNOWBOARDING)
+	}
+#endif
+	base.fn0394a0()
+}
