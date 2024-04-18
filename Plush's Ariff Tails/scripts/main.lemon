@@ -206,39 +206,19 @@ function void SetupCharacterAtStartPosition()
 //# address-hook(0x0067ee) end(0x0069b6)
 function void fn0067ee()
 {
-     if (!isMainCharacter(CHARACTER_TAILS) && u8[0xffffE654] == 0)
-    {
-        base.fn0067ee()
-        return
-    }
-	u32[0xffffb094] = 0x006c2c
-	InitializeGameCharacters()
-	RestoreShield()
-	if (checkpoint.number != 0 || global.stage_type != 0)
-		return
-
-	A1 = 0xffffb000
-	A2 = 0xffffb04a
-
-	if (global.zone_act == 0x0500)
-	{
-		//u32[0xffffb172] = 0x0396e4
-		if ((iczts && isMainCharacter(CHARACTER_TAILS) && u8[0xffffE654] == 0) || (isMainCharacter(CHARACTER_SONIC) && u8[0xffffE654] != 0))
-		{
-			u32[0xffffb172] = 0x0396e4
-			
-		}
-		// other chars skip snowboarding
-		else if (u8[0xffffE654] != 0 && isMainCharacter(CHARACTER_TAILS)) || (!iczts)
-        {
-            u32[0xffffb172] = 0x039b66
-
-        }
-    }
-    else 
-    {
-        base.fn0067ee()
-    }
+	if (iczts && global.zone_act == 0x0500 && isMainCharacter(CHARACTER_TAILS) && u8[0xffffE654] == 0)
+	{		
+		u32[0xffffb094] = 0x006c2c
+		InitializeGameCharacters()
+		RestoreShield()
+		if (checkpoint.number != 0 || global.stage_type != 0)
+			return
+		A1 = 0xffffb000
+		A2 = 0xffffb04a
+		u32[0xffffb172] = 0x0396e4 //shorten the code to this now
+	}
+	else
+	base.fn0067ee()
 }
 
 //# address-hook(0x0160d2)
