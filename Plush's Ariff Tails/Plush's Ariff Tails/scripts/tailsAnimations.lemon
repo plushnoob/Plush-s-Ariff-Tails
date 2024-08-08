@@ -1,0 +1,226 @@
+// got rid of that string format method for a much better version of the code - plush
+//looking up
+constant array <u8> TLU =
+{
+	11, 0xd3,0xb0, 0xff
+}
+//crouching
+constant array <u8> TC =
+{
+	11, 0xd1,0x99, 0xff
+}
+//skidding
+constant array <u8> skid =
+{
+	7, 0xdb,0x8e, 0xdc,0x8f, 0xff
+}
+//balancing
+constant array <u8> Bal =
+{
+	7, 0x9a,0xd2,0x9b, 0xff
+}
+//super idle anim
+constant array <u8> Sidle =
+{
+	13, 0xad,0xd5,0xd6,0xd5,0xad,0xd5,0xd6,0xd5,0xad,0xd5,0xd6,0xd5,0xad,0xaf,0xae, 0xff
+}
+//looks like lemons way ngl but its a rewrite nevertheless
+//# address-hook(0x015868)
+function void UpdateTailsAnimation_inner()
+{
+	if (u8[0xffffE654] != 0 || objA0.update_address == 0x0160d2)
+	{
+		base.UpdateTailsAnimation_inner()
+		return
+	}
+	if (char.state != char.state.former)
+	{
+		char.state.former = char.state
+		char.animation.frame = 0
+		char.animation.timer = 0
+		char.flags &= ~char.flag.PUSHING
+	}
+	if (char.state == char.state.LOOKING_UP)
+	{
+		D1.u8 = char.flags & char.flag.FACING_LEFT
+		char.render_flags = (char.render_flags & ~(render_flag.FLIP_X | render_flag.FLIP_Y)) | D1.u8
+		--char.animation.timer
+		if (s8(char.animation.timer) < 0)
+		{
+			D0.u8 = TLU[char.animation.frame + 1] // add these two to preven the anim from getting fucked up
+			char.animation.timer = TLU[0]
+			if (D0.u8 < 0xfc)
+			{
+				// Advance to next frame
+				char.animation.sprite = D0.u8
+				++char.animation.frame
+			}
+			else if (D0.u8 == 0xfd)
+			{
+				// Change to another animation
+				char.state = TLU[char.animation.frame + 2]
+			}
+			else if (D0.u8 == 0xfe)
+			{
+				// Loop animation from specific frame
+				u8 diff = TLU[char.animation.frame + 2]
+				char.animation.frame -= diff
+				char.animation.sprite = TLU[char.animation.frame + 1]
+				++char.animation.frame
+			}
+			else if (D0.u8 == 0xff)
+			{
+				// Loop animation from the start
+				char.animation.frame = 2
+				char.animation.sprite = TLU[2]
+			}
+		}
+	}
+	if (char.state == char.state.STANDING && super.active.tails && superoption)
+	{
+		D1.u8 = char.flags & char.flag.FACING_LEFT
+		char.render_flags = (char.render_flags & ~(render_flag.FLIP_X | render_flag.FLIP_Y)) | D1.u8
+		--char.animation.timer
+		if (s8(char.animation.timer) < 0)
+		{
+			D0.u8 = Sidle[char.animation.frame + 1]
+			char.animation.timer = Sidle[0]
+			if (D0.u8 < 0xfc)
+			{
+				// Advance to next frame
+				char.animation.sprite = D0.u8
+				++char.animation.frame
+			}
+			else if (D0.u8 == 0xfd)
+			{
+				// Change to another animation
+				char.state = Sidle[char.animation.frame + 2]
+			}
+			else if (D0.u8 == 0xfe)
+			{
+				// Loop animation from specific frame
+				u8 diff = Sidle[char.animation.frame + 2]
+				char.animation.frame -= diff
+				char.animation.sprite = Sidle[char.animation.frame + 1]
+				++char.animation.frame
+			}
+			else if (D0.u8 == 0xff)
+			{
+				// Loop animation from the start
+				char.animation.frame = 1
+				char.animation.sprite = Sidle[1]
+			}
+		}
+	}
+	if (char.state == char.state.COWERING)
+	{
+		D1.u8 = char.flags & char.flag.FACING_LEFT
+		char.render_flags = (char.render_flags & ~(render_flag.FLIP_X | render_flag.FLIP_Y)) | D1.u8
+		--char.animation.timer
+		if (s8(char.animation.timer) < 0)
+		{
+			D0.u8 = TC[char.animation.frame + 1] // add these two to preven the anim from getting fucked up
+			char.animation.timer = TC[0]
+			if (D0.u8 < 0xfc)
+			{
+				// Advance to next frame
+				char.animation.sprite = D0.u8
+				++char.animation.frame
+			}
+			else if (D0.u8 == 0xfd)
+			{
+				// Change to another animation
+				char.state = TC[char.animation.frame + 2]
+			}
+			else if (D0.u8 == 0xfe)
+			{
+				// Loop animation from specific frame
+				u8 diff = TC[char.animation.frame + 2]
+				char.animation.frame -= diff
+				char.animation.sprite = TC[char.animation.frame + 1]
+				++char.animation.frame
+			}
+			else if (D0.u8 == 0xff)
+			{
+				// Loop animation from the start
+				char.animation.frame = 2
+				char.animation.sprite = TC[2]
+			}
+		}
+	}
+	if (char.state == char.state.BRAKING)
+	{
+		D1.u8 = char.flags & char.flag.FACING_LEFT
+		char.render_flags = (char.render_flags & ~(render_flag.FLIP_X | render_flag.FLIP_Y)) | D1.u8
+		--char.animation.timer
+		if (s8(char.animation.timer) < 0)
+		{
+			D0.u8 = skid[char.animation.frame + 1] // add these two to preven the anim from getting fucked up
+			char.animation.timer = skid[0]
+			if (D0.u8 < 0xfc)
+			{
+				// Advance to next frame
+				char.animation.sprite = D0.u8
+				++char.animation.frame
+			}
+			else if (D0.u8 == 0xfd)
+			{
+				// Change to another animation
+				char.state = skid[char.animation.frame + 2]
+			}
+			else if (D0.u8 == 0xfe)
+			{
+				// Loop animation from specific frame
+				u8 diff = skid[char.animation.frame + 2]
+				char.animation.frame -= diff
+				char.animation.sprite = skid[char.animation.frame + 1]
+				++char.animation.frame
+			}
+			else if (D0.u8 == 0xff)
+			{
+				// Loop animation from the start
+				char.animation.frame = 4
+				char.animation.sprite = skid[4]
+			}
+		}	
+	}
+	if (char.state == char.state.BALANCING1)
+	{
+		D1.u8 = char.flags & char.flag.FACING_LEFT
+		char.render_flags = (char.render_flags & ~(render_flag.FLIP_X | render_flag.FLIP_Y)) | D1.u8
+		--char.animation.timer
+		if (s8(char.animation.timer) < 0)
+		{
+			D0.u8 = Bal[char.animation.frame + 1] // add these two to preven the anim from getting fucked up
+			char.animation.timer = Bal[0]
+			if (D0.u8 < 0xfc)
+			{
+				// Advance to next frame
+				char.animation.sprite = D0.u8
+				++char.animation.frame
+			}
+			else if (D0.u8 == 0xfd)
+			{
+				// Change to another animation
+				char.state = Bal[char.animation.frame + 2]
+			}
+			else if (D0.u8 == 0xfe)
+			{
+				// Loop animation from specific frame
+				u8 diff = Bal[char.animation.frame + 2]
+				char.animation.frame -= diff
+				char.animation.sprite = Bal[char.animation.frame + 1]
+				++char.animation.frame
+			}
+			else if (D0.u8 == 0xff)
+			{
+				// Loop animation from the start
+				char.animation.frame = 1
+				char.animation.sprite = Bal[1]
+			}
+		}	
+	}
+	else
+	base.UpdateTailsAnimation_inner()
+
+}

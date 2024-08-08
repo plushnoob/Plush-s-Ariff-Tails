@@ -1,0 +1,64 @@
+{
+	"Metadata":
+	{
+		"Name": "Plush's Ariff Tails",
+		"Author": "Plush noob, Michael7 ,Emi & Arifkunviid/Ariff7",
+		"Description": "Another port of Ariff's Tails along with Emi's edits & the super form",
+		"ModVersion": "1.4.0"
+	},
+	"Settings": 
+	{
+    		"Group1": 
+		[
+      			{
+        			"InternalName": "Super form",
+        			"DisplayName": "Separated Super Sprites",
+        			"Variable": "superoption",
+        			"DefaultValue": "1",
+        			"Category": "Appearance",
+        			"Options": 
+				{
+          				"0": "Off",
+          				"1": "On"
+        			}
+      			},
+      			{
+        			"InternalName": "pal",
+       				"DisplayName": "Palette",
+       				"Variable": "TPal",
+        			"DefaultValue": "0",
+        			"Category": "Appearance",
+        			"Options": 
+        			{
+          				"0": "Sonic 3",
+						"1": "EndPose palette",
+						"2": "B.S Esque"
+        			}
+      			},
+			{
+				"InternalName": "fox snowboards",
+				"DisplayName": "Snowboard In ICZ",
+				"Variable": "iczts",
+				"DefaultValue": "0",
+				"Category": "Fun",
+				"Options": 
+				{
+					"0": "Off",
+					"1": "On"
+				}	
+			},
+			{
+				"InternalName": "fox flight buffs",
+				"DisplayName": "Super Form Buffs",
+				"Variable": "SFB",
+				"DefaultValue": "0",
+				"Category": "Fun",
+				"Options": 
+				{
+					"0": "Off",
+					"1": "On"
+				}	
+			}
+		]
+	}
+}

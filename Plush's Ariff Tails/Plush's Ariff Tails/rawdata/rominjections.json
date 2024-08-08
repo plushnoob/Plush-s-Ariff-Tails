@@ -1,0 +1,27 @@
+{
+
+	"Data Sel Icons":
+	{
+		"File": "SK Extra.bin",
+		"RomInject": "0x15A774"
+	},
+	//COMP MODE
+	"Char sel sprite":
+	{
+		"File": "Player Sprites.bin",
+		"RomInject": "0x3a1b30"
+	},
+	//THIS IS NOT DONE YET I PLAN ON MAKING A FUTURE UPDATE WHERE THESE SPRITES ARE FINISHED IF YOUR THAT TEMPTED REMOVE THE LINES
+	/*
+	"compsprites":
+	{
+		"File": "Tails 2P.bin",
+		"RomInject": "0x33a840"
+	},
+	"compsprites tails edition":
+	{
+		"File": "Tails tails 2P.bin",
+		"RomInject": "0x33d5e0"
+	}
+	*/
+}
